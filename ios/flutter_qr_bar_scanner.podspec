@@ -15,7 +15,7 @@ A Plugin for reading/scanning QR & Bar codes using Google's Mobile Vision API.
 
   s.ios.deployment_target = '10.0'
 
-  s.dependency 'GoogleMLKit/BarcodeScanning'
+  s.dependency 'GoogleMLKit/BarcodeScanning', '> 0.64'
 
   s.static_framework = true
 end
