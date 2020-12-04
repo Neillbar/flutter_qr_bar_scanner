@@ -86,6 +86,14 @@ class FlutterQrReader {
   static Future<List<List<int>>> getSupportedSizes() {
     return _channel.invokeMethod('getSupportedSizes').catchError(print);
   }
+    static Future<dynamic> toggleTorch(bool value) {
+    if ( value) {
+      return _channel.invokeMethod('setTorchOn').catchError(print);
+    } else {
+      return _channel.invokeMethod('setTorchOff').catchError(print);
+    }
+   
+  }
 }
 
 enum FrameRotation { none, ninetyCC, oneeighty, twoseventyCC }

@@ -98,6 +98,28 @@
     return self;
 }
 
+- (void) turnTorchOn: (bool) on {
+    // check if flashlight available
+    Class captureDeviceClass = NSClassFromString(@"AVCaptureDevice");
+    if (captureDeviceClass != nil) {
+        AVCaptureDevice *device = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+        if ([device hasTorch] && [device hasFlash]){
+
+            [device lockForConfiguration:nil];
+            if (on) {
+                [device setTorchMode:AVCaptureTorchModeOn];
+                [device setFlashMode:AVCaptureFlashModeOn];
+                //torchIsOn = YES; //define as a variable/property if you need to know status
+            } else {
+                [device setTorchMode:AVCaptureTorchModeOff];
+                [device setFlashMode:AVCaptureFlashModeOff];
+                //torchIsOn = NO;
+            }
+            [device unlockForConfiguration];
+        }
+    } }
+
+
 - (void)start {
     NSAssert(_onFrameAvailable, @"On Frame Available must be set!");
     NSAssert(_onCodeAvailable, @"On Code Available must be set!");
@@ -272,7 +294,19 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     } else if ([@"heartbeat" isEqualToString:call.method]) {
         [self heartBeat];
         result(nil);
-    } else {
+    }  else if ([@"setTorchOn" isEqualToString:call.method]) {
+        if (_reader) {
+        [_reader turnTorchOn:true];
+        }
+       result(@"true");
+
+   } else if ([@"setTorchOff" isEqualToString:call.method]) {
+        if (_reader) {
+        [_reader turnTorchOn:false];
+        }
+      
+       result(@"fasle");
+   } else {
         result(FlutterMethodNotImplemented);
     }
 }
