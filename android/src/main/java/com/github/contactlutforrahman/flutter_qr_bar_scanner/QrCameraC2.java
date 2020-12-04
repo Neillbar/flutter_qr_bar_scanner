@@ -37,6 +37,7 @@ import static android.hardware.camera2.CameraMetadata.LENS_FACING_BACK;
 @TargetApi(21)
 class QrCameraC2 implements QrCamera {
 
+
     private static final String TAG = "cgl.fqs.QrCameraC2";
     private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
 
@@ -60,6 +61,8 @@ class QrCameraC2 implements QrCamera {
     private int orientation;
     private CameraDevice cameraDevice;
     private CameraCharacteristics cameraCharacteristics;
+    CameraManager manager;
+    String cameraIDS;
 
     QrCameraC2(int width, int height, Context context, SurfaceTexture texture, QrDetector2 detector) {
         this.targetWidth = width;
@@ -83,10 +86,16 @@ class QrCameraC2 implements QrCamera {
     public int getOrientation() {
         return orientation;
     }
+    // final Camera.Parameters parameters = camera.getParameters();
 
+    // parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
     @Override
     public void start() throws QrReader.Exception {
-        CameraManager manager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
+        System.out.println("CAMERA C2");
+        System.out.println("CAMERA C2B");
+        
+        manager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
+       
 
         if (manager == null) {
             throw new RuntimeException("Unable to get camera manager.");
@@ -122,7 +131,12 @@ class QrCameraC2 implements QrCamera {
             size = getAppropriateSize(map.getOutputSizes(SurfaceTexture.class));
             jpegSizes = map.getOutputSizes(ImageFormat.JPEG);
 
+            cameraIDS = cameraId;
+    
+           
             manager.openCamera(cameraId, new CameraDevice.StateCallback() {
+                
+                
                 @Override
                 public void onOpened(@NonNull CameraDevice device) {
                     cameraDevice = device;
@@ -138,12 +152,15 @@ class QrCameraC2 implements QrCamera {
                     Log.w(TAG, "Error opening camera: " + error);
                 }
             }, null);
+           
+         
         } catch (CameraAccessException e) {
             Log.w(TAG, "Error getting camera configuration.", e);
         }
     }
 
     private Integer afMode(CameraCharacteristics cameraCharacteristics) {
+     
 
         int[] afModes = cameraCharacteristics.get(CameraCharacteristics.CONTROL_AF_AVAILABLE_MODES);
 
@@ -166,6 +183,22 @@ class QrCameraC2 implements QrCamera {
             return null;
         }
     }
+    @Override
+    public void toggleFlashMode(boolean enable){
+        try {
+                        if (enable) {
+                            previewBuilder.set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_TORCH);
+                            previewBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
+                        } else {
+                            previewBuilder.set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_OFF);
+                            previewBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_OFF);
+                        }
+                        previewSession.setRepeatingRequest(previewBuilder.build(), null, null);
+                    
+                } catch (CameraAccessException e) {
+                    e.printStackTrace();
+                }
+        }
 
     private void startCamera() {
         List<Surface> list = new ArrayList<>();
@@ -201,6 +234,9 @@ class QrCameraC2 implements QrCamera {
             Integer afMode = afMode(cameraCharacteristics);
 
             previewBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
+
+            
+            // mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), null, null);
 
             if (afMode != null) {
                 previewBuilder.set(CaptureRequest.CONTROL_AF_MODE, afMode);
@@ -247,7 +283,6 @@ class QrCameraC2 implements QrCamera {
         if (cameraDevice == null) return;
 
         try {
-
             previewSession.setRepeatingRequest(previewBuilder.build(), listener, null);
         } catch (java.lang.Exception e) {
             e.printStackTrace();
@@ -258,12 +293,15 @@ class QrCameraC2 implements QrCamera {
     public void stop() {
         if (cameraDevice != null) {
             cameraDevice.close();
+            cameraDevice = null;
         }
         if (reader != null) {
             reader.close();
+            reader = null;
         }
     }
 
+  
     private Size getAppropriateSize(Size[] sizes) {
         // assume sizes is never 0
         if (sizes.length == 1) {

@@ -33,6 +33,12 @@ class QrReader {
         }
     }
 
+    void toggleFlashOnOff(boolean value) {
+        if(qrCamera != null) {
+            qrCamera.toggleFlashMode(value);
+        }
+    }
+
     void start(final int heartBeatTimeout) throws IOException, NoPermissionException, Exception {
         if (!hasCameraHardware(context)) {
             throw new Exception(Exception.Reason.noHardware);
@@ -67,6 +73,7 @@ class QrReader {
     }
 
     void stop() {
+        toggleFlashOnOff(false);
         if (heartbeat != null) {
             heartbeat.stop();
         }
@@ -78,6 +85,7 @@ class QrReader {
 
             camera = null;
         }
+        
         qrCamera.stop();
     }
 

@@ -70,6 +70,7 @@ public class FlutterQrBarScannerPlugin implements MethodCallHandler, QrReaderCal
     }
 
     private void stopReader() {
+        if(readingInstance == null) return;
         readingInstance.reader.stop();
         readingInstance.textureEntry.release();
         readingInstance = null;
@@ -164,6 +165,20 @@ public class FlutterQrBarScannerPlugin implements MethodCallHandler, QrReaderCal
             case "heartbeat": {
                 if (readingInstance != null) {
                     readingInstance.reader.heartBeat();
+                }
+                result.success(null);
+                break;
+            }
+            case "setTorchOn": {
+                if (readingInstance != null) {
+                    readingInstance.reader.toggleFlashOnOff(true);
+                }
+                result.success(null);
+                break;
+            }
+            case "setTorchOff": {
+                if (readingInstance != null) {
+                    readingInstance.reader.toggleFlashOnOff(false);
                 }
                 result.success(null);
                 break;

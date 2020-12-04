@@ -31,9 +31,12 @@ class QrCameraC1 implements QrCamera {
         targetWidth = width;
         this.detector = detector;
     }
+    @Override
+    public void toggleFlashMode(boolean value) {}
 
     @Override
     public void start() throws QrReader.Exception {
+        System.out.println("CAMERA C1");
     
         int numberOfCameras = Camera.getNumberOfCameras();
         info = new Camera.CameraInfo();
@@ -51,6 +54,10 @@ class QrCameraC1 implements QrCamera {
         }
 
         final Camera.Parameters parameters = camera.getParameters();
+
+        // parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+
+       
 
         List<String> focusModes = parameters.getSupportedFocusModes();
         if (focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
@@ -110,9 +117,11 @@ class QrCameraC1 implements QrCamera {
 
     @Override
     public void stop() {
+        // camera.parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
         camera.stopPreview();
         camera.setPreviewCallback(null);
         camera.release();
+       
     }
 
     //Size here is Camera.Size, not android.util.Size as in the QrCameraC2 version of this method
